@@ -396,7 +396,7 @@ Vediamo cosa quindi può fare una TM:
   poi arriva allo stato $Y$, altrimenti la macchina potrebbe:
   \begin{itemize}
     \item Fermarsi in uno stato $N$.
-    \item Entrare in un loop infinito, il quale può essere realmente infinito, oppure finito ed estremamente oneroso in termini di tempo. Tuttavia non è possibile capire a priori quale delle due ipotesi è giusta quando ci si trova in questa casistica.
+    \item Entrare in un loop infinito (poichè si è passata in input una stringa che NON appartiene al linguaggio, che ricordiamo, è quasi sempre INFINITO), il quale può essere realmente infinito, oppure finito ed estremamente oneroso in termini di tempo. Tuttavia non è possibile capire a priori quale delle due ipotesi è giusta quando ci si trova in questa casistica.
   \end{itemize}
   La TM non è in grado di distinguere completamente le stringhe che non
   fanno parte di un linguaggio. Un linguaggio è \textbf{ricorsivamente enumerabile} se, data una stringa opportuna in
@@ -464,7 +464,7 @@ stesso motivo, dovendo solo controllare in più se $s_0$ è $\sqcup$.
   posso capire se far uscire $M$ con $Y$ o $N$, in base a chi tra $M'$ e $M''$ è
   uscito con $Y$. 
 \end{proof}
-\subsection{Problemi di decisione}
+\section{Problemi di decisione}
 \begin{definizione}
   Un problema di decisione è un problema con solo due possibili risposte, $Y$ e
   $N$.\\
@@ -524,7 +524,7 @@ meno le stringhe del corrispondente linguaggio.
   peggiore.
 \end{definizione}
 \newpage
-\section{Problemi non risolvibili}
+\subsection{Problemi non decidibili}
 Ci serve, in primis, una nuova TM:
 \begin{definizione}
   Definiamo la \textbf{Universal Turing Machine (\textit{UTM})} come una TM che
@@ -575,55 +575,56 @@ quella macchina arriva a termine computazione o entra in loop infinito.
   decidibile.
 \end{teorema}
 \begin{proof}
-  \textbf{DIMOSTRAZIONE DA SISTEMARE!}\\
-  Immaginiamo per assurdo che $H$ sia ricorsivo e quindi esiste una TM $M_H$ che
-  prende in input $(M;x)$ e mi da sempre in output $M(x)$, ma così sto facendo
-  la stessa cosa della UTM. Ma $M_H$ non fa quello che fa la UTM, infatti fa:
-  \[
+  Immaginiamo per assurdo che $H$ sia ricorsivo e quindi esiste una TM $T_H(M;x)$ tale che:
+  \[T_H(M;x) =
     \begin{cases}
       Y& \mbox{ se }M(x)\neq \bot\\
       N& \mbox{ se }M(x) = \bot
+      \label{MH}
     \end{cases}
   \]
   Quindi fa qualcosa in più della UTM, perché se finisce in loop deve capire che
   è in loop infinito, interrompere e restituire $N$.\\
-  Assumo che $H$ quindi è ricorsivo e quindi $M_H$ esiste, anche se magari non
-  la so costruire. Se esiste $M_H$ deve esisterne un'altra, chiamata $D$, che
+  Assumo che $H$ quindi è ricorsivo e quindi $T_H$ esiste, anche se magari non
+  la so costruire. Se esiste $T_H$ deve esisterne un'altra, chiamata $D$, che
   presa in input solo $M$ produce:
-  \[D(M)\to M_H(M;M)\]
-  Dando in input alla TM la descrizione della TM stessa (che è comunque
-  ragionevole). Significa che:
-  \[M_H(M;M)=
+  \[D(M)\to T_H(M;M)\]
+  Questo significa che esiste una macchina $D$ che \textbf{simula} la macchina $T_H$ \textbf{non} su input generico ma dando in input la descrizione di M stessa. Significa che un programma prende in input se stesso (che comunque è una stringa). In particolare, secondo le ipotesi di $T_H$ (fig \ref{MH}):
+  \[T_H(M;M)=
     \begin{cases}
       Y& \mbox{ se }M(M)\neq \bot\\
       N& \mbox{ se }M(M)=\bot
     \end{cases}
   \]
-  ma voglio una macchina $D$ per la quale i risultati siano invertiti (è questa
-  la chiave della dimostrazione per assurdo):
-  \[D(M)=
+  Ora voglio far si che la macchina $D$, non solo simuli $T_H$, ma ne inverta anche i risulati. Quindi $D$ cambia $N$ in $Y$ e $Y$ in $\infty$, presa in input una macchina
+  $M$:
+    \[D(M) = T_{Hinvertita}(M;M)
     \begin{cases}
-      Y& \mbox{ se }M(M)\neq \bot\to\infty\\
-      N& \mbox{ se }M(M)=\bot\to Y
+      Y& \mbox{ se }M(M) \bot\\
+      \bot& \mbox{ se }M(M)\neq \bot
     \end{cases}
   \]
-  Quindi $D$ cambia $N$ in $Y$ e $Y$ in $\infty$, presa in input una macchina
-  $M$.\\
-  Provo quindi a dare in input a $D$ $D$ stessa, ottenendo o il loop o
-  $Y$. Ipotizziamo di andare in stato $Y$, quindi:
-  \[M_H(D;D)=N\]
-  che ci dice se $D$ su input $D$ termine e quindi $M_H$, per la definizione di
-  $M_H$ deve rispondere $N$, Ma $M_H$ risponde $N$ sse $D(D)$ deve andare in
-  loop infinito. Siamo arrivati ad un assurdo avendo detto che $M_H(D;D)=N$
-  accade sse $D(D)=Y$. \\
-  Inoltre se ipotizziamo che $D(D)$ va in loop allora $M_H(D;D)=Y$ che implica
-  che $D(D)$ termina la computazione, sempre per definizione. Ho ottenuto quindi
-  un'altra contraddizione, confermando la prova per assurdo.
+  Provo quindi a dare in input a $D$ se stessa, quindi per come è stata teorizzata la macchina avremo:
+  \[T_{Hinvertita}(D;D) = D(D) = 
+    \begin{cases}
+      Y& \mbox{ se }T_H(D;D) = N\\
+      \bot & \mbox{ se }T_H(D;D) = Y
+    \end{cases}
+  \]
+  Analizziamo più nel dettaglio i casi in cui $D(D)$ valga $\bot$ o $Y$:
+    \[D(D) = 
+    \begin{cases}
+      Y& \mbox{ se }T_H(D;D) = N \implies D(D) = \bot\\
+      \bot & \mbox{ se }T_H(D;D) = Y  \implies D(D) \neq\bot
+    \end{cases}
+  \]
+  Siamo arrivati all'assurdo.  \\
+  \[D\,\,\,non\,\,\,esiste\,\,\,\implies\,\,\,T_H\,\,\,non\,\,\,esiste\,\,\,\implies\,\,\,H\,\,\,non\,\,\,è\,\,\,ricorsivo.\]
 \end{proof}
 Si è dimostrato quindi che anche problemi ben definiti possono non essere
 decidibili, problemi come il definire il comportamento di un programma dato un
 input. Il problema comunque non è una potenza limitata della TM ma un limite
-intrinseco al problema stesso.
+intrinseco al problema stesso. \\ Abbiamo verificato che una TM non può dimostrare che un programma termina o va in loop, però possiamo dimostrare che esiste una TM che dimostra solo se un programma termina.
 \begin{teorema}
   Il linguaggio $H$ è ricorsivamente enumerabile, ovvero il problema è
   \textbf{parzialmente decidibile}. La macchina quindi riconosce una macchina
@@ -632,9 +633,9 @@ intrinseco al problema stesso.
 \begin{proof}
   Devo trovare una macchina che termina in $Y$ che riconosce una stringa
   appartenente al linguaggio $H$.\\
-  Costruisco quindi una $M_H'$ che prende in input una TM generica col suo
+  Costruisco quindi una $T_H'$ che prende in input una TM generica col suo
   input e si ha che:
-  \[M_H'(M;x)=
+  \[T_H'(M;x)=
    \begin{cases}
      Y &\mbox{ se } M(x)\mbox{ termina}\\
      N/\infty &\mbox{ altrimenti}
@@ -645,13 +646,13 @@ intrinseco al problema stesso.
   Pensando a UTM ho che:
   \[UTM(M;x)=
    \begin{cases}
-     Y &\mbox{ se } M(x)=Y\mbox{ avendo }M_H'=Y\\
-     N &\mbox{ se } M(x)=N\mbox{ avendo }M_H'=Y\\
-     H &\mbox{ se } M(x)=H\mbox{ avendo }M_H'=Y\\
-     \infty &\mbox{ se } M(x)=\infty\mbox{ avendo }M_H'=\infty\\
+     Y &\mbox{ se } M(x)=Y\mbox{ avendo }T_H'=Y\\
+     N &\mbox{ se } M(x)=N\mbox{ avendo }T_H'=Y\\
+     H &\mbox{ se } M(x)=H\mbox{ avendo }T_H'=Y\\
+     \infty &\mbox{ se } M(x)=\infty\mbox{ avendo }T_H'=\infty\\
     \end{cases}
   \]
-  Quindi $M_H'$ è una UTM con gli stati finali leggermente modificati (quindi
+  Quindi $T_H'$ è una UTM con gli stati finali leggermente modificati (quindi
   non più una UTM), avendo
   solo $Y$ (se termina) e $\infty$ (altrimenti). Abbiamo quindi dimostrato che è
   \textbf{parzialmente decidibile}, avendo che la macchina da $Y$ se la
@@ -676,12 +677,12 @@ nemmeno parzialmente decidibili. Pensiamo alle coppie $(M;x)$ che non terminano.
 Studiamo ora i problemi decidibili catalogandoli in base ai tempi, nei casi
 peggiori. Si hanno: 
 \begin{itemize}
-  \item algoritmi in tempo polinomiale rispetto alla dimensione dell'input
-  \item algoritmi in tempo esponenziale rispetto alla dimensione dell'input,
-  sono dimostrabilmente intrattabili
+  \item \textbf{algoritmi in tempo polinomiale rispetto alla dimensione dell'input}
+  \item \textbf{algoritmi in tempo esponenziale rispetto alla dimensione dell'input, sono dimostrabilmente intrattabili}
 \end{itemize}
 Bisogna capire se un problema cade in queste due categorie.\\
 Il tempo di esecuzione viene calcolato tramite il numero di passi della TM.
+\subsubsection{Calcolo del tempo}
 \begin{definizione}
   Definiamo $t_M(x)$ come il tempo di calcolo di un TM $M$ su input $x$. Non è
   un caso peggiore ma dipendente dal singolo input specifico. Il tempo di
@@ -696,6 +697,7 @@ studiando il caso peggiore, il numero massimo di passi.
   Definiamo $T_M(n)$ come la \textbf{funzione di complessità temporale} come:
   \[T_M(n)=\max\{t_m(x)|\,|x|=n\}\]
 \end{definizione}
+\subsubsection{La Classe P}
 \begin{definizione}
   Definisco la classe $P$ in base alle TM. La \textbf{classe P} è definita come:
   \[P=\{L|\mbox{ L è deciso da una DTM in tempo polinomiale } O(p(n))\}\]
@@ -720,6 +722,7 @@ studiando il caso peggiore, il numero massimo di passi.
   Se un problema è nella \textbf{classe P} allora è risolvibile in un
   \textbf{tempo efficiente}.
 \end{teorema}
+\subsubsection{Calcolo dello spazio}
 Devo anche definire lo \textbf{spazio}, oltre al \textbf{tempo}.\\
 \begin{definizione}
   Definisco lo \textbf{spazio di calcolo} come:
@@ -732,6 +735,7 @@ Devo anche definire lo \textbf{spazio}, oltre al \textbf{tempo}.\\
   Definisco $S_M(n)$ come la \textbf{funzione di complessità spaziale}:
   \[S_M(n)=\max\{s_M(x)|\,|x|=n\}\]
 \end{definizione}
+\subsubsection{Legame tra Spazio e Tempo}
 Spazio e tempo sono legati per una TM.\\
 Innanzitutto se una computazione dura $n$ passi (tempo) posso dire che al più ho
 usato $n$ celle (spazio), perché magari in qualche passo la testina rimane ferma
@@ -750,20 +754,16 @@ caso si specifica a parte di avere un input che occupa spazio $n$).
 \begin{teorema}
   Se ho una TM $M$ che lavora in spazio finito e tempo infinito, esiste una TM
   $M'$ che fa la stessa cosa di $M$ in tempo limitato.\\
-  Quindi se lo spazio è limitato allora il tempo è limitato.
+  Quindi se lo spazio è limitato allora posso costruire un'altra TM in cui il tempo è limitato.
 \end{teorema}
 \begin{proof}
-  Infatti la macchina $M'$ può trovarsi in un numero finito di stati $K$ e
-  avendo spazio limitato ho un numero limitato $S_M(n)$ di celle in cui si trova
-  la testina. Ho anche un numero finito di simboli in alfabeto $\sigma$ e
-  quindi: 
-  \[S_{M'}(n)\leq|k|\cdot |S_M(n)|\cdot |\Sigma|^{|S_M(n)|}\]
-  avendo che prima o poi ritorno a stati già visti quindi la macchina se supera
+  La macchina $M'$ può trovarsi in un numero finito di stati $K$ e, avendo spazio limitato, possiede un numero limitato $S_M(n)$ di celle in cui si può ritrovare la testina. $M'$ possiede anche un numero finito di simboli in alfabeto $\sigma$ e quindi: 
+  \[T_{M'}(n)\leq|k|\cdot |S_M(n)|\cdot |\Sigma|^{|S_M(n)|}\]
+  dove:   \[ |\Sigma|^{|S_M(n)|} \] indica che posso scrivere una quantità di $\sigma$ simboli per $S_M(n)$ caselle.
+  da ciò si evince che prima o poi si ritorna in stati già visti quindi la macchina se supera
   la quantità appena definita capisce di essere in loop (questo perché si ha a
   che fare con insiemi limitati e quindi tale ragionamento non va bene per
-  l'halting problem). Quindi $|k|\cdot |S_M(n)|\cdot |\Sigma|^{|S_M(n)|}$ è
-  anche un limite temporale per la seconda macchina (\textbf{rivedere
-    quest'ultima affermazione}).
+  l'halting problem).
 \end{proof}
 Quindi data una certa macchina che lavora in un certo spazio $S(n)$ posso
 costruire una macchina equivalente che da la stessa risposta in tempo limitato
@@ -774,8 +774,9 @@ polinomiale comporta spazio polinomiale.
 I problemi nella \textbf{classe EXP} sono ancora in studio per capire se sono
 \textbf{dimostrabilmente intrattabili}. Per il loro studio
 si usano le \textbf{NonDeterministic Turing Machine (NDTM)} che sono comunque
-puramente teoriche, in quanto non si è in grado fisicamente di costruirle. Nella
-DTM deterministica avevo una $\delta$ mentre nella NDTM ho:
+puramente teoriche, in quanto non si è in grado fisicamente di costruirle. 
+\subsubsection{Relazione di Transizione}
+Nella DTM deterministica avevo una $\delta$ mentre nella NDTM ho:
 \[\Delta\subseteq (k\times \Sigma)\times (k\times \Sigma \times\{\leftarrow,
   \rightarrow, -\})\]
 Con $\Delta$, detta \textbf{relazione di transizione}, che non è una funzione
@@ -789,6 +790,7 @@ passare a uno tra più stati, a seconda della \textit{scelta}, formando così un
 albero. Il singolo passo di computazione non è univocamente definito. Ogni
 singolo ramo comunque è equivalente al passo di computazione della DTM. Tramite
 $\Delta$ definisco il passaggio tra stati.\\
+\subsubsection{Accettabilità e Deidibilità}
 Per capire se una stringa è accettata o meno dalla NDTM, visto che potrei andare
 sia in $Y$ che in $N$ (che in $H$) a seconda della varie computazioni
 dell'albero, si ha che:
@@ -804,9 +806,9 @@ dell'albero, si ha che:
 \end{definizione}
 \begin{definizione}
   Un linguaggio $L$ è \textbf{accettato} da una NDTM $N$ se per tutte le
-  stringhe che fanno parte del linguaggio esiste almeno una computazione che
+  stringhe che fanno parte del linguaggio esiste \textbf{almeno} una computazione che
   termina nello stato $Y$, ovvero esiste una computazione per cui:
-  \[\forall x\in L\Rightarrow N(x)=Y\]
+  \[\forall x\in L\Rightarrow \exists\,\,almeno\,\, una\,\, computazione\,\, di\,\, N\,\, con\,\, input\,\, x\,\, tale\,\, che\,\, N(x)=Y\]
 \end{definizione}
 \begin{definizione}
   Un linguaggio $L$ è \textbf{deciso} da una NDTM $N$ se, qualora la stringa $x$
@@ -846,7 +848,7 @@ dell'albero, si ha che:
 \end{teorema}
 \begin{proof}
   La NDTM non viene simulata da una DTM procedendo per rami, concludendoli, ma
-  si procede per singoli passi su ogni ramo (onde evitare di incappare
+  si procede per singoli passi su ogni ramo (onde evitare d'incappare
   prematuramente in loop). Si scende quindi per livelli simulando poi tutti i
   rami (dovendo però ``tornare indietro'' ogni volta per passare al ramo
   successivo). Quindi muovendomi tra i rami posso simulare tramite una DTM
@@ -857,35 +859,14 @@ Le NDTM sono ``più potenti'' in termini di tempo di computazione.
   La NDTM $N$ decide il linguaggio $L$ in tempo $T(N)$ se:
   \begin{itemize}
     \item $N$ decide $L$
-    \item $\forall\,x\in \Sigma^*$ se;
-    \[(s_0,x,1)\to(s_G, z, \rho_G)\]
-    in $M^k$ passi, avendo $k\leq F(N)$
+    \item $\forall\,x\in \Sigma^*$ se la macchina $M$ effettua $k$ passi del tipo $(s_0,x,1)\to(s_G, z, \rho_G)$ in modo tale che $k\leq F(N)$
   \end{itemize}
-  Trovo quindi uno $Y$ in ogni caso in meno di $F(n)$ passi.\\
-  Ho quindi un ramo che in almeno $k$ passi porta in $Y$, per ogni stringa
-  accettata, se $L$ è accettato. 
-  \textbf{Rivedere definizione}
+  Quindi, se la stringa fa parte del linguaggio, la macchina la riconosce come tale poiché la \textbf{decide} in, al massimo, $F(N)$ passi . Altrimenti, se la stringa non fa parte del linguaggio, la macchina lo deve capire in, al massimo, $F(N)$ passi.
 \end{definizione}
-Il problema diventa quindi trovare il ramo giusto. Nei problemi dimostrabilmente
-esponenziali richiedono che il ramo $Y$ sia lunghissimo mentre ci sono altri
-problemi per i quali tale ramo richiederebbe tempo polinomiale per arrivare a
-$Y$ ma non si sa quale sia tale ramo da seguire, la soluzione diventa quindi
-provarli tutti, arrivando a tempi esponenziali.\\
-Ponendo il limite $F(n)$ posso studiare che ogni singolo ramo non superi $F(n)$
-quindi la NTDM impiega il tempo richiesto da un solo ramo per decidere e
-accettare, perché di passo in passo capisce su quale ramo non proseguire
-(???).\\
-un altro modo di vedere la NDTM è pensare che parallelamente si sposti in tutti
-i livelli fino a cercare uno $Y$ e se non lo trova risponda $N$. Il tempo è
-comunque in termini di livello dell'albero. La NDTM è una macchina
-\textbf{massicciamente parallela}.\\
+In un modo la $NDTM$ riesce a capire quale strada percorrere, in al più $F(N)$ passi, per trovare $Y$ (altrimenti la risposta è $N$, poiché non si potrebbe andare il loop essendo l'albero limitato da $F(N)$). Si può pensare come una macchina \textbf{parallela}, che segue ogni livello di ogni ramo in concorrenza.
 Quindi la NTDM, per quanto non più potente in termini di riconoscimento, lo è in
-base al tempo, basandosi sui livelli dell'albero. 
-Si parla di \textbf{guess\&check}, per il metodo che individua il ramo da
-seguire e lo controlla, controllando lo stato $Y$.\\
-Ci interessa quindi il tempo di verifica. Ci sono problemi difficili da
-risolvere e facili da verificare e altri che sono pure difficili da
-verificare.\\
+base al tempo, basandosi sui livelli dell'albero.
+\subsubsection{Classe NP}
 La classe dei problemi facilmente verificabili di cui non si ha una facile
 risoluzione altro non è che la \textbf{classe NP}, che sono problemi polinomiali
 in modo non deterministico.
